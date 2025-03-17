@@ -8,6 +8,7 @@ import com.waysphere.odata.model.FloorMap;
 import com.waysphere.odata.repository.DigitalFloorFeatureRepository;
 import com.waysphere.odata.repository.FloorMapRepository;
 import com.waysphere.odata.utils.GeoJsonUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,4 +77,70 @@ public class DigitalFloorFeatureController {
 
         return ResponseEntity.ok(featureCollection);
     }
+
+    @DeleteMapping("/{orgId}/{floorId}")
+    public ResponseEntity<?> deleteFeaturesByFloor(
+            @PathVariable Long orgId,
+            @PathVariable String floorId) {
+
+        int deletedCount = repository.deleteByFloorId(orgId, floorId);
+
+        if (deletedCount > 0) {
+            return ResponseEntity.ok("Deleted " + deletedCount + " features for floor: " + floorId);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No features found for floor: " + floorId);
+        }
+    }
+
+    @DeleteMapping("/{orgId}/{floorId}/{featureId}")
+    public ResponseEntity<?> deleteFeature(@PathVariable Long orgId,
+                                           @PathVariable String floorId,
+                                           @PathVariable Long featureId) {
+        try {
+            if (!repository.existsById(featureId)) {
+                return ResponseEntity.badRequest().body("Feature not found");
+            }
+            repository.deleteById(featureId);
+            return ResponseEntity.ok("Feature deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+
+    @PutMapping("/{orgId}/{floorId}/{featureId}")
+    public ResponseEntity<?> updateFeature(@PathVariable Long orgId,
+                                           @PathVariable String floorId,
+                                           @PathVariable Long featureId,
+                                           @RequestBody String geoJson) {
+        try {
+            // Step 1: Fetch the existing feature by ID
+            DigitalFloorFeature existingFeature = repository.findById(featureId)
+                    .orElseThrow(() -> new RuntimeException("Feature not found for ID: " + featureId));
+
+            // Step 2: Convert new GeoJSON data into a List of features
+            List<DigitalFloorFeature> featureList = GeoJsonUtils.fromGeoJson(geoJson, existingFeature.getFloorMap());
+
+            // Step 3: Ensure only one feature is being updated
+            if (featureList.isEmpty()) {
+                return ResponseEntity.badRequest().body("Invalid GeoJSON: No features found");
+            }
+
+            DigitalFloorFeature updatedFeature = featureList.get(0); // Since we are updating one feature
+
+            // Step 4: Update existing feature (Preserve ID)
+            existingFeature.setGeometry(updatedFeature.getGeometry());  // Update Geometry
+            existingFeature.setProperties(updatedFeature.getProperties()); // Update Properties
+
+            // Step 5: Save the updated feature
+            repository.save(existingFeature);
+
+            return ResponseEntity.ok("Feature updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+
 }
