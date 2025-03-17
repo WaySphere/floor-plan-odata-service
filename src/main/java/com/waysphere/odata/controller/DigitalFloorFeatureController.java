@@ -8,6 +8,7 @@ import com.waysphere.odata.model.FloorMap;
 import com.waysphere.odata.repository.DigitalFloorFeatureRepository;
 import com.waysphere.odata.repository.FloorMapRepository;
 import com.waysphere.odata.utils.GeoJsonUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,13 @@ public class DigitalFloorFeatureController {
                                                    @PathVariable String floorId,
                                                    @RequestBody String geoJson) {
         try {
+            // Check if features already exist for the given floorId
+            boolean exists = repository.existsByFloorMapId(floorId);
+            if (exists) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Floor ID already exists. Please use PUT to update the existing features.");
+            }
+
             FloorMap floorMap = floorMapRepository.findById(floorId)
                     .orElseThrow(() -> new RuntimeException("FloorMap not found for ID: " + floorId));
 
@@ -76,4 +84,55 @@ public class DigitalFloorFeatureController {
 
         return ResponseEntity.ok(featureCollection);
     }
+
+    @DeleteMapping("/{orgId}/{floorId}")
+    public ResponseEntity<?> deleteFeaturesByFloor(
+            @PathVariable Long orgId,
+            @PathVariable String floorId) {
+
+        int deletedCount = repository.deleteByFloorId(orgId, floorId);
+
+        if (deletedCount > 0) {
+            return ResponseEntity.ok("Deleted " + deletedCount + " features for floor: " + floorId);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No features found for floor: " + floorId);
+        }
+    }
+
+    @PutMapping("/{orgId}/{floorId}")
+    public ResponseEntity<?> updateFeatureCollection(
+            @PathVariable Long orgId,
+            @PathVariable String floorId,
+            @RequestBody String geoJson) {
+        try {
+
+            // Check if features already exist for the given floorId
+            boolean exists = repository.existsByFloorMapId(floorId);
+            if (!exists) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Floor ID does not exists. Please use POST to add the features");
+            }
+
+            // Step 1: Fetch FloorMap
+            FloorMap floorMap = floorMapRepository.findById(floorId)
+                    .orElseThrow(() -> new RuntimeException("FloorMap not found for ID: " + floorId));
+
+            // Step 2: Delete existing features
+            repository.deleteFeaturesByFloorId(orgId, floorId);
+
+            // Step 3: Convert GeoJSON to Entity Objects
+            List<DigitalFloorFeature> features = GeoJsonUtils.fromGeoJson(geoJson, floorMap);
+
+            // Step 4: Save updated features
+            repository.saveAll(features);
+
+            return ResponseEntity.ok("FeatureCollection updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+
+
 }
