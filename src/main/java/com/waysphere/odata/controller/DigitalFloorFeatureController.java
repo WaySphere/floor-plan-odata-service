@@ -3,6 +3,7 @@ package com.waysphere.odata.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.waysphere.odata.model.DigitalFloorFeature;
 import com.waysphere.odata.model.FloorMap;
 import com.waysphere.odata.repository.DigitalFloorFeatureRepository;
@@ -59,7 +60,7 @@ public class DigitalFloorFeatureController {
             try {
                 JsonNode geometryNode = objectMapper.readTree(row[1].toString()); // Convert String to JSON
                 JsonNode propertiesNode = objectMapper.readTree(row[2].toString());
-
+                ((ObjectNode)propertiesNode).put("id", row[0].toString());
                 return Map.of(
                         "type", "Feature",
                         "geometry", geometryNode,
