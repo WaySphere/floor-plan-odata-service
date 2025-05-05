@@ -38,5 +38,10 @@ public class FloorMapController {
 
         return ResponseEntity.ok(repository.save(floor));
     }
+
+    @GetMapping("/{orgId}")
+    public List<FloorMap> getAllFloors(@PathVariable Long orgId) {
+        return repository.findByOrganizationId(orgId);
+    }
 }
 
