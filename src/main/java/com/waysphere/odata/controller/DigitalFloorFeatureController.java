@@ -143,5 +143,20 @@ public class DigitalFloorFeatureController {
         }
     }
 
+    @GetMapping("/feature/{featureId}/orgid")
+    public ResponseEntity<?> getOrgIdByFeatureId(@PathVariable Long featureId) {
+        try {
+            Long orgId = repository.findOrgIdByFeatureId(featureId);
+            if (orgId == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Organization ID not found for feature ID: " + featureId);
+            }
+            return ResponseEntity.ok(Map.of("orgId", orgId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving orgId: " + e.getMessage());
+        }
+    }
+
 
 }

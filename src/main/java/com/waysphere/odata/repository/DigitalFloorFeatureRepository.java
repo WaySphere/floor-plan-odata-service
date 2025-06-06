@@ -31,4 +31,11 @@ public interface DigitalFloorFeatureRepository extends JpaRepository<DigitalFloo
 """, nativeQuery = true)
     int deleteByFloorId(@Param("orgId") Long orgId, @Param("floorId") String floorId);
 
+    @Query(value = """
+    SELECT fm.org_id 
+    FROM digital_floor_feature dff
+    JOIN floor_map fm ON dff.floor_map_id = fm.id
+    WHERE dff.id = :featureId
+""", nativeQuery = true)
+    Long findOrgIdByFeatureId(@Param("featureId") Long featureId);
 }

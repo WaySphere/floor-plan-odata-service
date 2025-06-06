@@ -19,10 +19,11 @@ public class OrganizationController {
 
     // Create a new Organization
     @PostMapping
-    public ResponseEntity<Organization> createOrganization(@RequestParam Long id, @RequestParam String name) {
+    public ResponseEntity<Organization> createOrganization(@RequestParam Long id, @RequestParam String name, @RequestParam String domainName) {
         Organization organization = new Organization();
         organization.setId(id);  // Manually set the ID
         organization.setName(name);
+        organization.setDomainName(domainName);
         return ResponseEntity.ok(repository.save(organization));
     }
 
