@@ -25,7 +25,8 @@ public class FloorMapController {
     @PostMapping
     public ResponseEntity<?> createFloor(@RequestParam String floorId,
                                          @RequestParam Long orgId,
-                                         @RequestParam String dataStoreId) {
+                                         @RequestParam String dataStoreId,
+                                         @RequestParam Integer level) {
         // Find Organization
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
@@ -35,6 +36,7 @@ public class FloorMapController {
         floor.setId(floorId);
         floor.setOrganization(organization);
         floor.setDataStoreId(dataStoreId);
+        floor.setLevel(level);
 
         return ResponseEntity.ok(repository.save(floor));
     }

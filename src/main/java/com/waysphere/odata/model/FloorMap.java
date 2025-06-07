@@ -21,6 +21,16 @@ public class FloorMap {
     @Column(nullable = false)
     private String dataStoreId;
 
+    private Integer level;
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
     public String getId() {
         return id;
     }
