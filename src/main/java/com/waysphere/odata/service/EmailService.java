@@ -2,6 +2,7 @@ package com.waysphere.odata.service;
 
 import com.waysphere.odata.repository.OrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -21,13 +22,6 @@ public class EmailService {
     private ConcurrentHashMap<String, String> otpStore = new ConcurrentHashMap<>();
 
     public String sendOtpEmail(String toEmail) {
-        String domain = extractDomain(toEmail);
-
-        // ✅ Check if the domain exists in Organization table
-        boolean domainExists = organizationRepository.findByDomainName(domain).isPresent();
-        if (!domainExists) {
-            return "Domain not authorized to receive OTP.";
-        }
 
         String otp = generateOtp();
         otpStore.put(toEmail, otp);
@@ -53,12 +47,16 @@ public class EmailService {
         }
         return false;
     }
+    public boolean isDomainAuthorized(String domain) {
+        return organizationRepository.findByDomainName(domain).isPresent();
+    }
+
 
     private String generateOtp() {
         return String.valueOf(100000 + new Random().nextInt(900000));
     }
 
-    private String extractDomain(String email) {
+    public String extractDomain(String email) {
         return email.substring(email.indexOf("@") + 1).toLowerCase();
     }
 }
