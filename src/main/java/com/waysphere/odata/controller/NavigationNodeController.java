@@ -76,6 +76,14 @@ public class NavigationNodeController {
                 .collect(Collectors.collectingAndThen(Collectors.toList(), ResponseEntity::ok));
     }
 
+    @GetMapping("floor/path")
+    public ResponseEntity<List<NavigationNodeRequest>> getPATHNodesByFloor(@RequestParam String floor) {
+        return nodeRepository.findByFloorMap_IdAndNodeType(floor, "PATH")
+                .stream()
+                .map(NavigationNode::toDTO)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ResponseEntity::ok));
+    }
+
     @GetMapping("org/poi")
     public ResponseEntity<List<NavigationNodeSummaryDTO>> getPOINodesByOrgId(@RequestParam Long orgId) {
         List<NavigationNode> poiNodes = nodeRepository.findPOINodesByOrganizationId(orgId);
