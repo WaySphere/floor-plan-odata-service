@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/navigation-nodes")
@@ -66,7 +67,24 @@ public class NavigationNodeController {
                 .map(node -> ResponseEntity.ok(node.toDTO()))
                 .orElse(ResponseEntity.notFound().build());
     }
-    @GetMapping("/poi")
+
+    @GetMapping("floor/poi")
+    public ResponseEntity<List<NavigationNodeRequest>> getPOINodesByFloor(@RequestParam String floor) {
+        return nodeRepository.findByFloorMap_IdAndNodeType(floor, "POI")
+                .stream()
+                .map(NavigationNode::toDTO)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ResponseEntity::ok));
+    }
+
+    @GetMapping("floor/path")
+    public ResponseEntity<List<NavigationNodeRequest>> getPATHNodesByFloor(@RequestParam String floor) {
+        return nodeRepository.findByFloorMap_IdAndNodeType(floor, "PATH")
+                .stream()
+                .map(NavigationNode::toDTO)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ResponseEntity::ok));
+    }
+
+    @GetMapping("org/poi")
     public ResponseEntity<List<NavigationNodeSummaryDTO>> getPOINodesByOrgId(@RequestParam Long orgId) {
         List<NavigationNode> poiNodes = nodeRepository.findPOINodesByOrganizationId(orgId);
 

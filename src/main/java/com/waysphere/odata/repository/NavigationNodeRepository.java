@@ -15,6 +15,7 @@ public interface NavigationNodeRepository extends JpaRepository<NavigationNode, 
     AND n.floorMap.organization.id = :orgId
 """)
     List<NavigationNode> findPOINodesByOrganizationId(@Param("orgId") Long orgId);
-
+    List<NavigationNode> findByFloorMap_Id(String floorId);
+    List<NavigationNode> findByFloorMap_IdAndNodeType(String floorId, String nodeType);
 
 }
