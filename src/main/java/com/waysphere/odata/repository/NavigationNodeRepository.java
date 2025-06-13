@@ -18,4 +18,18 @@ public interface NavigationNodeRepository extends JpaRepository<NavigationNode, 
     List<NavigationNode> findByFloorMap_Id(String floorId);
     List<NavigationNode> findByFloorMap_IdAndNodeType(String floorId, String nodeType);
 
+    @Query(value = """
+    SELECT n.node_id
+    FROM navigation_node n
+    JOIN floor_map f ON n.floor_id = f.id
+    WHERE f.level = :level
+    ORDER BY (
+        POWER(n.latitude - :lat, 2) + POWER(n.longitude - :lng, 2)
+    ) ASC
+    LIMIT 1
+    """, nativeQuery = true)
+    Long findNearestNodeId(@Param("lat") double lat,
+                           @Param("lng") double lng,
+                           @Param("level") int level);
+
 }
