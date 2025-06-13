@@ -139,4 +139,20 @@ public class NavigationNodeController {
 
         return ResponseEntity.ok(path.stream().map(NavigationNode::toDTO).toList());
     }
+
+    @GetMapping("/pathByLocation")
+    public ResponseEntity<List<NavigationNodeRequest>> getPathByLocation(@RequestParam double lat,
+                                                 @RequestParam double lng,
+                                                 @RequestParam int level,
+                                                 @RequestParam Long to) {
+        Long nodeId = nodeRepository.findNearestNodeId(lat, lng, level);
+
+        NavigationNode start = nodeRepository.findById(nodeId).orElseThrow();
+        NavigationNode end = nodeRepository.findById(to).orElseThrow();
+
+        List<NavigationNode> path = pathFindingService.findPath(start, end);
+
+        return ResponseEntity.ok(path.stream().map(NavigationNode::toDTO).toList());
+    }
+
 }
