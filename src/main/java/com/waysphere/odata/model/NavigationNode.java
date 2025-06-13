@@ -1,6 +1,7 @@
 package com.waysphere.odata.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.waysphere.odata.dto.NavigationNodePath;
 import com.waysphere.odata.dto.NavigationNodeRequest;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -135,5 +136,21 @@ public class NavigationNode {
             request.setConnectedNodeId(connectedNode.getNodeId());
         }
         return request;
+    }
+
+    public NavigationNodePath toPathDTO(){
+        NavigationNodePath path = new NavigationNodePath();
+        path.setNodeId(this.nodeId);
+        path.setFloorId(floorMap.getId());
+        path.setLatitude(latitude);
+        path.setLongitude(longitude);
+        path.setNodeType(nodeType);
+        path.setLabel(label);
+        path.setExitNode(exitNode);
+        if (connectedNode != null) {
+            path.setConnectedNodeId(connectedNode.getNodeId());
+        }
+        path.setLevel(floorMap.getLevel());
+        return path;
     }
 }

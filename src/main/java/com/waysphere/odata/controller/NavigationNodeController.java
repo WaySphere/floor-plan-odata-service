@@ -1,5 +1,6 @@
 package com.waysphere.odata.controller;
 
+import com.waysphere.odata.dto.NavigationNodePath;
 import com.waysphere.odata.dto.NavigationNodeRequest;
 import com.waysphere.odata.dto.NavigationNodeSummaryDTO;
 import com.waysphere.odata.model.FloorMap;
@@ -141,10 +142,10 @@ public class NavigationNodeController {
     }
 
     @GetMapping("/pathByLocation")
-    public ResponseEntity<List<NavigationNodeRequest>> getPathByLocation(@RequestParam double lat,
-                                                 @RequestParam double lng,
-                                                 @RequestParam int level,
-                                                 @RequestParam Long to) {
+    public ResponseEntity<List<NavigationNodePath>> getPathByLocation(@RequestParam double lat,
+                                                                      @RequestParam double lng,
+                                                                      @RequestParam int level,
+                                                                      @RequestParam Long to) {
         Long nodeId = nodeRepository.findNearestNodeId(lat, lng, level);
 
         NavigationNode start = nodeRepository.findById(nodeId).orElseThrow();
@@ -152,7 +153,7 @@ public class NavigationNodeController {
 
         List<NavigationNode> path = pathFindingService.findPath(start, end);
 
-        return ResponseEntity.ok(path.stream().map(NavigationNode::toDTO).toList());
+        return ResponseEntity.ok(path.stream().map(NavigationNode::toPathDTO).toList());
     }
 
 }
