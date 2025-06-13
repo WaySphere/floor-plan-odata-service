@@ -69,6 +69,7 @@ public class NavigationNodeController {
                     "label", node.getLabel(), "exitNode", node.isExitNode()));
         }
 
+        nodeRepository.save(node);
         return ResponseEntity.ok(Map.of("nodeId", node.getNodeId(),
                 "label", node.getLabel(), "exitNode", node.isExitNode()));
     }
@@ -174,6 +175,7 @@ public class NavigationNodeController {
         List<NavigationNode> path = pathFindingService.findPath(start, end);
 
         return ResponseEntity.ok(path.stream().map(NavigationNode::toPathDTO).toList());
+//        return ResponseEntity.ok(path.stream().map(NavigationNode::getNodeId).toList());
     }
 
 }
