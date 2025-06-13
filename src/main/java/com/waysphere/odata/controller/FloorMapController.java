@@ -25,13 +25,13 @@ public class FloorMapController {
     @PostMapping
     public ResponseEntity<?> createFloor(@RequestParam String floorId,
                                          @RequestParam Long orgId,
-                                         @RequestParam String dataStoreId,
                                          @RequestParam Integer level) {
         // Find Organization
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
 
         // Create FloorMap
+        String dataStoreId = "s3://"+floorId+".json";
         FloorMap floor = new FloorMap();
         floor.setId(floorId);
         floor.setOrganization(organization);
