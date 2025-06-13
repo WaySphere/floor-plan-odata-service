@@ -51,7 +51,7 @@ public class PersonController {
         if (personOpt.isPresent()) {
             Person person = personOpt.get();
             if (person.isAdmin() && person.getPassword().equals(password)) {
-                return ResponseEntity.ok("Login successful for admin: " + person.getName());
+                return ResponseEntity.ok(Map.of("organizationId", person.getOrganization().getId()));
             } else {
                 return ResponseEntity.status(403).body("Access denied. Not an admin or invalid password.");
             }
