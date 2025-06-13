@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -61,13 +62,15 @@ public class NavigationNodeController {
             connectedNode.getConnectedNodes().add(node); // Add the new node to the connected node's list
 
             // Save connected node only after both links are set to avoid JPA transient issues
-            nodeRepository.save(node);               // Save the new node
+            node = nodeRepository.save(node);               // Save the new node
             nodeRepository.save(connectedNode);      // Save the updated connected node
 
-            return ResponseEntity.ok(node);
+            return ResponseEntity.ok(Map.of("nodeId", node.getNodeId(),
+                    "label", node.getLabel(), "exitNode", node.isExitNode()));
         }
 
-        return ResponseEntity.ok(nodeRepository.save(node));
+        return ResponseEntity.ok(Map.of("nodeId", node.getNodeId(),
+                "label", node.getLabel(), "exitNode", node.isExitNode()));
     }
 
     @GetMapping
