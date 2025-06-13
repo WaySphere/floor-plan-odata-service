@@ -48,11 +48,28 @@ public class NavigationNodeController {
         if (request.isExitNode() && request.getConnectedNodeId() != null) {
             NavigationNode connectedNode = nodeRepository.findById(request.getConnectedNodeId())
                     .orElseThrow(() -> new RuntimeException("Connected node not found"));
+
+            // Ensure both nodes are marked as exit
+            connectedNode.setExitNode(true);
             node.setConnectedNode(connectedNode);
+
+            // Set reverse connection for bidirectional link (optional)
+            connectedNode.setConnectedNode(node);
+
+
+            node.getConnectedNodes().add(connectedNode); // Add the connected node to the new node's list
+            connectedNode.getConnectedNodes().add(node); // Add the new node to the connected node's list
+
+            // Save connected node only after both links are set to avoid JPA transient issues
+            nodeRepository.save(node);               // Save the new node
+            nodeRepository.save(connectedNode);      // Save the updated connected node
+
+            return ResponseEntity.ok(node);
         }
 
         return ResponseEntity.ok(nodeRepository.save(node));
     }
+
     @GetMapping
     public ResponseEntity<List<NavigationNodeRequest>> getAllNodes() {
         List<NavigationNodeRequest> dtoList = nodeRepository.findAll()
