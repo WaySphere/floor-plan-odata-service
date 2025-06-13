@@ -1,5 +1,6 @@
 package com.waysphere.odata.service;
 
+import com.waysphere.odata.model.Organization;
 import com.waysphere.odata.repository.OrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,14 +40,26 @@ public class EmailService {
         return "OTP sent to " + toEmail;
     }
 
-    public boolean verifyOtp(String email, String otp) {
+//    public boolean verifyOtp(String email, String otp) {
+//        String storedOtp = otpStore.get(email);
+//        if (storedOtp != null && storedOtp.equals(otp)) {
+//            otpStore.remove(email);
+//            return true;
+//        }
+//        return false;
+//    }
+
+    public Optional<Organization> verifyOtpAndGetOrganization(String email, String otp) {
         String storedOtp = otpStore.get(email);
         if (storedOtp != null && storedOtp.equals(otp)) {
             otpStore.remove(email);
-            return true;
+            String domain = extractDomain(email);
+            return organizationRepository.findByDomainName(domain);
         }
-        return false;
+        return Optional.empty();
     }
+
+
     public boolean isDomainAuthorized(String domain) {
         return organizationRepository.findByDomainName(domain).isPresent();
     }
